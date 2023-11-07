@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<catalog>
+    <product id="">
+        <productName>5</productName>
+        <sku>5</sku>
+        <manufacturer>5</manufacturer>
+        <category>5</category>
+        <unitprice>5</unitprice>
+        <quantityInStock>5</quantityInStock>
+        <reorderPoint>5</reorderPoint>
+        <supplier>5</supplier>
+        <dateRecieved>5</dateRecieved>
+        <shelfLocation>5</shelfLocation>
+        <productStatus>5</productStatus>
+    </product>
+</catalog>

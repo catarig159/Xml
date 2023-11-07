@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory</title>
+</head>
+<body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Stuct keeping Unit</th>
+                <th>Manufacturer</th>
+                <th>Category</th>
+                <th>Unit Price</th>
+                <th>Quantity in Stock</th>
+                <th>Reorder's Point</th>
+                <th>Supplier</th>
+                <th>Date Recieved</th>
+                <th>Shelf Location</th>
+                <th>Product Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="productsTable"></tbody>
+    </table>
+
+    <div>
+        <h2>Add Product</h2>
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" required>
+        <label for="sku">Struct keeping Unit:</label>
+        <input type="text" id="sku" required>
+        <label for="manufacturer">Manufacturer:</label>
+        <input type="text" id="manufacturer" required>
+        <label for="category">Category:</label>
+        <input type="text" id="category" required>
+        <label for="unitPrice">Unit Price:</label>
+        <input type="text" id="unitPrice" required>
+        <label for="quantityInStock">Quantity in Stock:</label>
+        <input type="text" id="quantityInStock" required>
+        <label for="reorderPoint">Reorder's Point:</label>
+        <input type="text" id="reorderPoint" required>
+        <label for="supplier">Supplier:</label>
+        <input type="text" id="supplier" required>
+        <label for="dateReceived">Date Received:</label>
+        <input type="text" id="dateReceived" required>
+        <label for="shelfLocation">Shelf Location:</label>
+        <input type="text" id="shelfLocation" required>
+        <label for="productStatus">Product Status:</label>
+        <input type="text" id="productStatus" required>
+        <button onclick="addProduct()">Add Product</button>
+    </div>
+
+    <button id="logoutButton">Log Out</button>
+
+    <script>
+        const logoutButton = document.getElementById("logoutButton");
+        let xmlContent = '';
+        let tableproducts = document.getElementById('productsTable');
+        let template = '';
+
+        fetch('PII.xml')
+            .then((response) => {
+                response.text().then((xml) => {
+                    xmlContent = xml;
+                    let parser = new DOMParser();
+                    let xmlDOM = parser.parseFromString(xmlContent, 'application/xml');
+                    let products1 = xmlDOM.querySelectorAll('product');
+                    for (let i = 0; i < products1.length; i++) {
+                        template += `
+                            <tr>
+                                <td>${i + 1}</td>
+                                <td>${products1[i].children[0].textContent}</td>
+                                <td>${products1[i].children[1].textContent}</td>
+                                <td>${products1[i].children[2].textContent}</td>
+                                <td>${products1[i].children[3].textContent}</td>
+                                <td>${products1[i].children[4].textContent}</td>
+                                <td>${products1[i].children[5].textContent}</td>
+                                <td>${products1[i].children[6].textContent}</td>
+                                <td>${products1[i].children[7].textContent}</td>
+                                <td>${products1[i].children[8].textContent}</td>
+                                <td>${products1[i].children[9].textContent}</td>
+                                <td>${products1[i].children[10].textContent}</td>
+                                <td>
+                                    <button onclick="editProduct(${i})">Edit</button>
+                                    <button onclick="deleteProduct(${i})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    tableproducts.innerHTML = template;
+                });
+            });
+
+        logoutButton.addEventListener("click", function () {
+            sessionStorage.clear();
+            window.location.href = "login/index.html";
+        });
+
+        function addProduct() {
+            const productName = document.getElementById("productName").value;
+            const sku = document.getElementById("sku").value;
+            const manufacturer = document.getElementById("manufacturer").value;
+            const category = document.getElementById("category").value;
+            const unitPrice = document.getElementById("unitPrice").value;
+            const quantityInStock = document.getElementById("quantityInStock").value;
+            const reorderPoint = document.getElementById("reorderPoint").value;
+            const supplier = document.getElementById("supplier").value;
+            const dateReceived = document.getElementById("dateReceived").value;
+            const shelfLocation = document.getElementById("shelfLocation").value;
+            const productStatus = document.getElementById("productStatus").value;
+
+            const productElement = document.createElement("product");
+            productElement.setAttribute("id", "p" + (tableproducts.rows.length - 1));
+
+            const productAttributes = [
+                "productName",
+                "sku",
+                "manufacturer",
+                "category",
+                "unitprice",
+                "quantityInStock",
+                "reorderPoint",
+                "supplier",
+                "dateRecieved",
+                "shelfLocation",
+                "productStatus",
+            ];
+
+            const attributeValues = [
+                productName,
+                sku,
+                manufacturer,
+                category,
+                unitPrice,
+                quantityInStock,
+                reorderPoint,
+                supplier,
+                dateReceived,
+                shelfLocation,
+                productStatus,
+            ];
+
+            for (let i = 0; i < productAttributes.length; i++) {
+                const childElement = document.createElement(productAttributes[i]);
+                childElement.textContent = attributeValues[i];
+                productElement.appendChild(childElement);
+            }
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+            xmlDoc.querySelector("catalog").appendChild(productElement);
+
+            xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+            tableproducts.innerHTML += `
+                <tr>
+                    <td>${tableproducts.rows.length}</td>
+                    <td>${productName}</td>
+                    <td>${sku}</td>
+                    <td>${manufacturer}</td>
+                    <td>${category}</td>
+                    <td>${unitPrice}</td>
+                    <td>${quantityInStock}</td>
+                    <td>${reorderPoint}</td>
+                    <td>${supplier}</td>
+                    <td>${dateReceived}</td>
+                    <td>${shelfLocation}</td>
+                    <td>${productStatus}</td>
+                    <td>
+                        <button onclick="editProduct(${tableproducts.rows.length - 1})">Edit</button>
+                        <button onclick="deleteProduct(${tableproducts.rows.length - 1})">Delete</button>
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("productName").value = "";
+            document.getElementById("sku").value = "";
+            document.getElementById("manufacturer").value = "";
+            document.getElementById("category").value = "";
+            document.getElementById("unitPrice").value = "";
+            document.getElementById("quantityInStock").value = "";
+            document.getElementById("reorderPoint").value = "";
+            document.getElementById("supplier").value = "";
+            document.getElementById("dateReceived").value = "";
+            document.getElementById("shelfLocation").value = "";
+            document.getElementById("productStatus").value = "";
+        }
+
+        function editProduct(index) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+            const productElement = xmlDoc.querySelectorAll('product')[index];
+            if (productElement) {
+                const productName = productElement.children[0].textContent;
+            }
+        }
+
+        function updateProduct() {
+            const updateProductId = parseInt(document.getElementById("updateProductId").value);
+            const updatedProductName = document.getElementById("updateProductName").value;
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlContent, "application.xml");
+            const productElement = xmlDoc.querySelectorAll('product')[updateProductId];
+            if (productElement) {
+                productElement.children[0].textContent = updatedProductName;
+
+                xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+                tableproducts.rows[updateProductId + 1].cells[1].textContent = updatedProductName;
+
+                document.getElementById("updateProductId").value = "";
+                document.getElementById("updateProductName").value = "";
+            }
+        }
+
+        function deleteProduct(index) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlContent, "application/xml");
+            const productElements = xmlDoc.querySelectorAll('product');
+            if (index >= 0 && index < productElements.length) {
+                productElements[index].remove();
+
+                xmlContent = new XMLSerializer().serializeToString(xmlDoc);
+
+                tableproducts.deleteRow(index + 1);
+            }
+        }
+
+        function contains(selector, text) {
+            const elements = document.querySelectorAll(selector);
+            return Array.prototype.filter.call(elements, function (element) {
+                return RegExp(text).test(element.textContent);
+            });
+        }
+        
+    </script>
+</body>
+</html>
